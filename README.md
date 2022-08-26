@@ -1,2 +1,2 @@
-# cs1302jupyter
-Jupyter environment for CS1302
+# cs1302
+Jupyter environment for cs1302.

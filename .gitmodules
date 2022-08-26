@@ -1,0 +1,3 @@
+[submodule "docker/docker-stacks"]
+	path = docker/docker-stacks
+	url = https://github.com/dive4dec/docker-stacks
