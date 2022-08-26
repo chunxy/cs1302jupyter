@@ -3,7 +3,7 @@ SHELL:= /bin/bash
 REGISTRY=localhost:32000
 # REGISTRY=chungc
 # version for tagging image for deployment
-VERSION=0.0.2
+VERSION=0.0.1a
 
 push-%:
 	docker tag "$*" "${REGISTRY}/$*:${VERSION}"
@@ -45,7 +45,7 @@ math:
 
 cs1302nb: scipy-10
 	base=scipy-10; i=0; \
-	for module in jupyter-interface programming math grading dev; \
+	for module in jupyter-interface programming dev; \
 	do \
 	stage="cs1302nb$$((++i))_$$module"; \
 	docker build --build-arg BASE_CONTAINER="$$base" \
@@ -55,23 +55,10 @@ cs1302nb: scipy-10
 	docker tag "$$stage" cs1302nb
 	docker run --rm -it  -p 8888:8888/tcp cs1302nb
 
-cs1302hub: cds
-	base=scipy-cds; i=0; \
-	for module in jupyter-interface programming math grading dev; \
-	do \
-	stage="cs1302$$((++i))_$$module"; \
-	docker build --build-arg BASE_CONTAINER="$$base" \
-		-t "$$stage" -f "$$module/Dockerfile" .; \
-	base="$$stage"; \
-	done; \
-	docker tag "$$stage" cs1302
-	docker run --rm -it  -p 8888:8888/tcp cs1302
-
-cds:
-	docker build \
-		-t "cds" -f cds/Dockerfile .
-	# docker run --rm -it  -p 8888:8888/tcp -v "$$(pwd)/cds":/home/jovyan/work cds bash
-	# jupyterhub --config /home/jovyan/work/config.py
+cs1302hub:
+	cd cs1302-deploy && \
+	docker build --pull \
+		-t "cs1302hub" -f Dockerfile .
 
 scipy-10:
 	docker build \
@@ -85,6 +72,6 @@ scipy-10:
 		-t "scipy-10" docker-stacks/scipy-notebook
 
 
-modules := cs1302nb cs1302hub main cds scipy-nv scipy-10 programming divedeep jupyter-interface math datamining classic push
+modules := cs1302nb cs1302hub main scipy-10 programming jupyter-interface push
 
 .PHONY: $(modules)

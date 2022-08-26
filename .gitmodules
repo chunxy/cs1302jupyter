@@ -1,3 +1,6 @@
 [submodule "docker/docker-stacks"]
 	path = docker/docker-stacks
 	url = https://github.com/dive4dec/docker-stacks
+[submodule "docker/cs1302-deploy"]
+	path = docker/cs1302-deploy
+	url = https://github.com/dive4dec/cs1302-deploy.git
