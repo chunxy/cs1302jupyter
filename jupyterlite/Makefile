@@ -3,11 +3,25 @@ SHELL:= /bin/bash
 REGISTRY=localhost:32000
 # REGISTRY=chungc
 # version for tagging image for deployment
-VERSION=0.0.1b
+VERSION=0.0.1a
 
 push-%:
 	docker tag "$*" "${REGISTRY}/$*:${VERSION}"
 	docker push "${REGISTRY}/$*:${VERSION}"
+
+# Scipy notebook with GPU support (Nvidia CUDA)
+scipy-nv:
+	docker build \
+		--pull \
+		--build-arg ROOT_CONTAINER="nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04" \
+		--build-arg PYTHON_VERSION="3.9" \
+		-t "base-notebook-nv" docker-stacks/base-notebook
+	docker build \
+		--build-arg BASE_CONTAINER="base-notebook-nv" \
+		-t "minimal-notebook-nv" docker-stacks/minimal-notebook
+	docker build \
+		--build-arg BASE_CONTAINER="minimal-notebook-nv" \
+		-t "scipy-nv" docker-stacks/scipy-notebook
 
 # Support different programming languages in addition to python such as
 # C++, Java, SQL, javascript, typescript, ...
