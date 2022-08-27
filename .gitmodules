@@ -4,3 +4,6 @@
 [submodule "docker/cs1302-deploy"]
 	path = docker/cs1302-deploy
 	url = https://github.com/dive4dec/cs1302-deploy.git
+[submodule "jupyterlite/files"]
+	path = jupyterlite/files
+	url = https://github.com/dive4dec/cs1302
