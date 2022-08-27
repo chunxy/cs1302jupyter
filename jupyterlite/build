@@ -1,5 +1,0 @@
-#!/bin/bash
-
-rm -rf _output
-pip install -r requirements.txt
-jupyter lite build
