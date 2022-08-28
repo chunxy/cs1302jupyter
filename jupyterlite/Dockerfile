@@ -4,11 +4,8 @@ FROM ${BASE_CONTAINER}
 
 USER ${NB_USER}
 
-# Programming languages frontends
-RUN mamba install --quiet --yes \
-    'ghp-import' && \
-    pip install --quiet --no-cache-dir \
-    'jupyterlite==0.1.0b12' \
-    && \
-    mamba clean --all -f -y && \
+COPY --chown=${NB_UID}:${NB_GID} requirements.txt requirements.txt
+
+RUN pip install --quiet --no-cache-dir \
+    -r requirements.txt && \
     fix-permissions "${CONDA_DIR}"

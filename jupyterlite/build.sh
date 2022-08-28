@@ -1,9 +1,9 @@
 #!/bin/bash
 
 declare -a cmds=(
-    "rm -rf _output"
+    "rm -rf _output .jupyterlite.doit.db"
     "pip install -r requirements.txt"
-    "jupyter lite build"
+    "jupyter lite build && jupyter lite build"
     "ghp-import -nfp _output"
 )
 
