@@ -12,17 +12,6 @@ RUN pip install --quiet --no-cache-dir \
     && \
     fix-permissions "${CONDA_DIR}"
 
-RUN mamba install --quiet --yes \
-    'voila' \
-    'dash' \
-    'streamlit' \
-    'rise' \
-    && \
-    # pip install --quiet --no-cache-dir \
-    # git+https://github.com/dive4dec/nbgrader.git && \
-    mamba clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}"
-
 # RUN \
 #     #  alias yarn="jlpm" && \
 #     pip install --quiet --no-cache-dir \

@@ -3,7 +3,7 @@ SHELL:= /bin/bash
 REGISTRY=localhost:32000
 # REGISTRY=chungc
 # version for tagging image for deployment
-VERSION=0.0.1c
+VERSION=0.0.1d
 
 push-%:
 	docker tag "$*" "${REGISTRY}/$*:${VERSION}"
@@ -41,10 +41,27 @@ cs1302nb: scipy-10
 	docker tag "$$stage" cs1302nb
 	docker run --rm -it  -p 8888:8888/tcp cs1302nb
 
+cs1302inb: scipy-10
+	base=scipy-10; i=0; \
+	for module in jupyter-interface programming dev instructor; \
+	do \
+	stage="cs1302inb$$((++i))_$$module"; \
+	docker build --build-arg BASE_CONTAINER="$$base" \
+		-t "$$stage" -f "$$module/Dockerfile" .; \
+	base="$$stage"; \
+	done; \
+	docker tag "$$stage" cs1302inb
+	docker run --rm -it  -p 8888:8888/tcp cs1302inb
+
 cs1302hub:
 	cd cs1302-deploy && \
 	docker build --pull \
 		-t "cs1302hub" -f Dockerfile .
+
+cs1302ihub:
+	cd cs1302-deploy/instructor && \
+	docker build --pull \
+		-t "cs1302ihub" -f Dockerfile .
 
 scipy-10:
 	docker build \
