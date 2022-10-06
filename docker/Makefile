@@ -29,9 +29,14 @@ math:
 		-t "math" -f math/Dockerfile .
 	docker run --rm -it  -p 8888:8888/tcp math
 
+tex:
+	docker build --pull \
+		-t "tex" -f tex/Dockerfile .
+	docker run --rm -it  -p 8888:8888/tcp tex
+
 cs1302nb: scipy-10
 	base=scipy-10; i=0; \
-	for module in jupyter-interface programming dev; \
+	for module in jupyter-interface programming tex dev; \
 	do \
 	stage="cs1302nb$$((++i))_$$module"; \
 	docker build --build-arg BASE_CONTAINER="$$base" \
@@ -75,6 +80,6 @@ scipy-10:
 		-t "scipy-10" docker-stacks/scipy-notebook
 
 
-modules := cs1302nb cs1302hub main scipy-10 programming jupyter-interface push
+modules := cs1302nb cs1302hub main scipy-10 programming jupyter-interface push tex
 
 .PHONY: $(modules)
