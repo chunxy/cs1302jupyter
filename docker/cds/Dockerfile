@@ -11,8 +11,8 @@ RUN mamba install --quiet --yes \
     'streamlit' \
     'rise' \
     && \
-    pip install --quiet --no-cache-dir \
-    git+https://github.com/dive4dec/nbgrader.git && \
+    # pip install --quiet --no-cache-dir \
+    # git+https://github.com/dive4dec/nbgrader.git && \
     mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}"
 

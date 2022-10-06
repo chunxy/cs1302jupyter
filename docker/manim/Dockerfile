@@ -14,7 +14,8 @@ RUN apt-get update --yes && \
 
 USER ${NB_USER}
 
-RUN pip install --quiet --no-cache-dir \
+RUN mamba remove --quiet --yes cairo && \
+    pip install --quiet --no-cache-dir \
     'manim' \
     && \
     mamba clean --all -f -y && \

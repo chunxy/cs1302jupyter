@@ -29,14 +29,14 @@ math:
 		-t "math" -f math/Dockerfile .
 	docker run --rm -it  -p 8888:8888/tcp math
 
-tex:
+manim:
 	docker build --pull \
-		-t "tex" -f tex/Dockerfile .
-	docker run --rm -it  -p 8888:8888/tcp tex
+		-t "manim" -f manim/Dockerfile .
+	docker run --rm -it  -p 8888:8888/tcp manim
 
 cs1302nb: scipy-10
 	base=scipy-10; i=0; \
-	for module in jupyter-interface programming tex dev; \
+	for module in jupyter-interface programming manim dev cds; \
 	do \
 	stage="cs1302nb$$((++i))_$$module"; \
 	docker build --build-arg BASE_CONTAINER="$$base" \
@@ -46,17 +46,17 @@ cs1302nb: scipy-10
 	docker tag "$$stage" cs1302nb
 	docker run --rm -it  -p 8888:8888/tcp cs1302nb
 
-cs1302inb: scipy-10
-	base=scipy-10; i=0; \
-	for module in jupyter-interface programming dev instructor; \
-	do \
-	stage="cs1302inb$$((++i))_$$module"; \
-	docker build --build-arg BASE_CONTAINER="$$base" \
-		-t "$$stage" -f "$$module/Dockerfile" .; \
-	base="$$stage"; \
-	done; \
-	docker tag "$$stage" cs1302inb
-	docker run --rm -it  -p 8888:8888/tcp cs1302inb
+# cs1302inb: scipy-10
+# 	base=scipy-10; i=0; \
+# 	for module in jupyter-interface programming dev cds; \
+# 	do \
+# 	stage="cs1302inb$$((++i))_$$module"; \
+# 	docker build --build-arg BASE_CONTAINER="$$base" \
+# 		-t "$$stage" -f "$$module/Dockerfile" .; \
+# 	base="$$stage"; \
+# 	done; \
+# 	docker tag "$$stage" cs1302inb
+# 	docker run --rm -it  -p 8888:8888/tcp cs1302inb
 
 cs1302hub:
 	cd cs1302-deploy && \
@@ -80,6 +80,6 @@ scipy-10:
 		-t "scipy-10" docker-stacks/scipy-notebook
 
 
-modules := cs1302nb cs1302hub main scipy-10 programming jupyter-interface push tex
+modules := cs1302nb cs1302hub main scipy-10 programming jupyter-interface push manim
 
 .PHONY: $(modules)
