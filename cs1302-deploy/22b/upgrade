@@ -1,0 +1,3 @@
+#!/bin/bash
+
+helm upgrade jupyterhub-cs1302 jupyterhub/jupyterhub -n cs1302-22b --cleanup-on-fail --install --create-namespace --version=2.0.0 -f jupyterhub.yaml

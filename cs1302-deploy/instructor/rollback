@@ -1,0 +1,3 @@
+#!/bin/bash
+
+helm rollback jupyterhub-instructor --cleanup-on-fail -n cs1302i

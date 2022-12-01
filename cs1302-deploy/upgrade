@@ -1,0 +1,3 @@
+#!/bin/bash
+
+helm upgrade jupyterhub-1660929258 jupyterhub/jupyterhub -n cs1302 --cleanup-on-fail --install --create-namespace --version=2.0.0-beta.1 -f jupyterhub.yaml

@@ -1,0 +1,158 @@
+hub:
+  baseUrl: /cs1302i
+  containerSecurityContext:
+    # runAsUser: 0
+    # runAsGroup: 0
+    allowPrivilegeEscalation: true
+  image: 
+    name: localhost:32000/cs1302ihub
+    tag: 0.0.1c
+  config:
+    Authenticator:
+      admin_users:
+        - ccha23
+        - qihaliang2
+        - ruoqitang2
+    JupyterHub:
+      admin_access: true
+      authenticator_class: pam
+  extraConfig:
+    01-custom-attr: |
+      import subprocess
+      from tornado import gen
+      from shlex import quote
+      from jupyterhub.auth import PAMAuthenticator
+
+      try:
+        import pamela
+      except Exception as e:
+        pamela = None
+        _pamela_error = e
+      
+      class p(PAMAuthenticator):
+        @gen.coroutine
+        
+        def system_user_exists(self, user):
+          cmd = 'getent passwd {}'.format(quote(user.name))
+          try:
+            subprocess.check_output(cmd, shell=True).decode("utf-8").strip()
+          except subprocess.CalledProcessError as e:
+            return False
+          else:
+            return True
+
+        def pre_spawn_start(self, user, spawner):
+          uid = subprocess.check_output(["id", "-u", user.name]).decode("utf-8").strip()
+          gid = subprocess.check_output(["id", "-g", user.name]).decode("utf-8").strip()
+          cmd = 'getent passwd {} | cut -d: -f6'.format(quote(user.name))
+          userdir = subprocess.check_output(cmd, shell=True).decode("utf-8").strip()
+
+          cmd = 'sudo mkhomedir_helper {}'.format(quote(user.name))
+          try:
+            subprocess.check_output(cmd, shell=True)
+          except subprocess.CalledProcessError as e:
+            pass
+
+          cmd = 'chown -hR {}:{} {}'.format(uid, gid, userdir)
+          try:
+            subprocess.check_output(cmd, shell=True)
+          except subprocess.CalledProcessError as e:
+            pass
+
+          spawner.environment['NB_UID'] = str(int(uid))
+          spawner.environment['NB_GID'] = str(int(gid))
+          spawner.environment['NB_USER'] = user.name
+
+          spawner.volumes = [
+            {
+              'name': 'home',
+              'hostPath': {
+                'path': userdir,
+                'type': 'Directory'
+              }
+            }
+          ]
+          spawner.volume_mounts = [
+            {
+              'mountPath': '/home/{username}',
+              'name': 'home'
+            }
+          ]
+
+          if not self.open_sessions:
+            return
+          try:
+            pamela.open_session(user.name, service=self.service, encoding=self.encoding)
+          except pamela.PAMError as e:
+            self.log.warning("Failed to open PAM session for %s: %s", user.name, e)
+            self.log.warning("Disabling PAM sessions from now on.")
+            self.open_sessions = False
+
+      c.JupyterHub.authenticator_class = p
+    cds-handlers: |
+      from cdsdashboards.hubextension import cds_extra_handlers
+      c.JupyterHub.extra_handlers = cds_extra_handlers
+    cds-templates: |
+      from cdsdashboards.app import CDS_TEMPLATE_PATHS
+      c.JupyterHub.template_paths = CDS_TEMPLATE_PATHS
+    cds-kube: |
+      c.JupyterHub.spawner_class = 'cdsdashboards.hubextension.spawners.variablekube.VariableKubeSpawner'
+      c.CDSDashboardsConfig.builder_class = 'cdsdashboards.builder.kubebuilder.KubeBuilder'
+    cds-presentation-types: |
+      c.VariableMixin.extra_presentation_launchers = {
+          'http.server': {
+              'cmd': ['start.sh', 'python3', '-m', 'jhsingle_native_proxy.main'],
+              'args': [
+                  'python3', '{-}m', 'http.server', '{-}d', '{presentation_path}', '{port}'
+                  ],
+          }
+      }
+      c.CDSDashboardsConfig.extra_presentation_types = ['http.server']
+  extraVolumes:
+    - name: home
+      hostPath:
+        path: '/home'
+        type: Directory
+  extraVolumeMounts:
+    - mountPath: '/home'
+      name: home
+  allowNamedServers: true
+
+
+singleuser:
+  # defaultUrl: "/lab"
+  uid: 0
+  # cmd: start-singleuser.sh
+  memory:
+    limit: 4G
+    guarantee: 2G
+  cpu:
+    limit: 4
+    guarantee: 0.25
+  storage:
+    type: none
+  extraEnv:
+    CHOWN_HOME: "yes"
+  profileList:
+    # - display_name: cds
+    #   default: true
+    #   kubespawner_override:
+    #     image: ideonate/containds-allr-datascience:0.6.2
+    - display_name: CS1302
+      description: |-
+        For the course CS1302 Introduction to Computer Programming.
+      kubespawner_override:
+        image: localhost:32000/cs1302nb:0.0.1d
+        # cmd: start-singleuser.sh
+    - default: true
+      display_name: Dashboard
+      description: |-
+        For cdsdashboards use only.
+      kubespawner_override:
+        image: localhost:32000/cs1302nb:0.0.1d
+
+ingress:
+  enabled: true
+  hosts:
+    - divedeep.cs.cityu.edu.hk
+
